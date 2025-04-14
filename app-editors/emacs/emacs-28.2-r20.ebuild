@@ -1,4 +1,4 @@
-# Copyright 1999-2025 Gentoo Authors
+# Copyright 1999-2026 Gentoo Authors
 # Distributed under the terms of the GNU General Public License v2
 
 EAPI=8
@@ -43,7 +43,7 @@ DESCRIPTION="The advanced, extensible, customizable, self-documenting editor"
 HOMEPAGE="https://www.gnu.org/software/emacs/"
 
 LICENSE="GPL-3+ FDL-1.3+ BSD HPND MIT W3C unicode PSF-2"
-IUSE="acl alsa aqua athena cairo dbus dynamic-loading games gfile gif +gmp gpm gsettings gtk gui gzip-el harfbuzz imagemagick +inotify jit jpeg json kerberos lcms libxml2 livecd m17n-lib mailutils motif png selinux sound source ssl svg systemd +threads tiff toolkit-scroll-bars valgrind wide-int Xaw3d xft +xpm zlib"
+IUSE="acl alsa athena cairo dbus dynamic-loading games gfile gif +gmp gpm gsettings gtk gui gzip-el harfbuzz imagemagick +inotify jit jpeg json kerberos lcms libxml2 livecd m17n-lib mailutils motif png selinux sound source ssl svg systemd +threads tiff toolkit-scroll-bars valgrind wide-int Xaw3d xft +xpm zlib"
 
 RDEPEND=">=app-emacs/emacs-common-1.11[games?,gui?]
 	sys-libs/ncurses:0=
@@ -69,7 +69,7 @@ RDEPEND=">=app-emacs/emacs-common-1.11[games?,gui?]
 	systemd? ( sys-apps/systemd )
 	valgrind? ( dev-debug/valgrind )
 	zlib? ( virtual/zlib:= )
-	gui? ( !aqua? (
+	gui? (
 		x11-libs/libICE
 		x11-libs/libSM
 		x11-libs/libX11
@@ -120,10 +120,10 @@ RDEPEND=">=app-emacs/emacs-common-1.11[games?,gui?]
 				) )
 			)
 		)
-	) )"
+	)"
 
 DEPEND="${RDEPEND}
-	gui? ( !aqua? ( x11-base/xorg-proto ) )"
+	gui? ( x11-base/xorg-proto )"
 
 BDEPEND="sys-apps/texinfo
 	virtual/pkgconfig
@@ -253,12 +253,6 @@ src_configure() {
 		einfo "Configuring to build without window system support"
 		myconf+=(
 			--without-x --without-ns
-		)
-	elif use aqua; then
-		einfo "Configuring to build with Nextstep (Macintosh Cocoa) support"
-		myconf+=(
-			--with-ns --disable-ns-self-contained
-			--without-x
 		)
 	else
 		myconf+=(
@@ -493,13 +487,6 @@ src_install() {
 
 	dodoc README BUGS CONTRIBUTE
 
-	if use gui && use aqua; then
-		dodir /Applications/Gentoo
-		rm -rf "${ED}"/Applications/Gentoo/${EMACS_SUFFIX^}.app || die
-		mv nextstep/Emacs.app \
-			"${ED}"/Applications/Gentoo/${EMACS_SUFFIX^}.app || die
-	fi
-
 	local DOC_CONTENTS="You can set the version to be started by
 		/usr/bin/emacs through the Emacs eselect module, which also
 		redirects man and info pages. Therefore, several Emacs versions can
@@ -514,9 +501,6 @@ src_install() {
 			machine would satisfy basic Emacs requirements under X11.
 			See also https://wiki.gentoo.org/wiki/Xft_support_for_GNU_Emacs
 			for how to enable anti-aliased fonts."
-		use aqua && DOC_CONTENTS+="\\n\\n${EMACS_SUFFIX^}.app is in
-			\"${EPREFIX}/Applications/Gentoo\". You may want to copy or
-			symlink it into /Applications by yourself."
 	fi
 	tc-is-cross-compiler && DOC_CONTENTS+="\\n\\nEmacs did not write
 		a portable dump file due to being cross-compiled.
