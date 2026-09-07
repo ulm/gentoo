@@ -138,7 +138,7 @@ src_test() {
 			"They are known to fail with FEATURES usersandbox or -userpriv. See bug #756382."
 
 		runtestargs+=(
-			# unit/oom-score-adj was introduced in version 6.2.0
+			## unit/oom-score-adj was introduced in version 6.2.0
 			--skipunit unit/oom-score-adj # bug #756382
 
 			# Following test was added in version 7.0.0 to unit/introspection.
@@ -147,10 +147,12 @@ src_test() {
 		)
 	fi
 
-	if use ssl; then
-		edo ./utils/gen-test-certs.sh
-		runtestargs+=( --tls )
-	fi
+	# Breaks unrelated tests with 'large-memory' tag error (bug #976445)
+	#if use ssl; then
+	#	edo ./utils/gen-test-certs.sh
+	#	runtestargs+=( --tls )
+	#	:;
+	#fi
 
 	edo ./runtest "${runtestargs[@]}"
 }
