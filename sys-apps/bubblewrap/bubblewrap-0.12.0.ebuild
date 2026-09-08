@@ -36,6 +36,7 @@ RDEPEND+=" selinux? ( sec-policy/selinux-bubblewrap )"
 
 PATCHES=(
 	"${FILESDIR}"/${PN}-0.11.2-no-werror.patch
+	"${FILESDIR}"/${PN}-0.12.0-musl.patch
 )
 
 python_check_deps() {
