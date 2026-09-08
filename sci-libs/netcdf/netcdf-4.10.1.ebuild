@@ -18,9 +18,9 @@ DESCRIPTION="Scientific library and interface for array oriented data access"
 HOMEPAGE="https://www.unidata.ucar.edu/software/netcdf/"
 SRC_URI="
 	https://downloads.unidata.ucar.edu/netcdf-c/${PV}/${PN}-c-${PV}.tar.gz
-	test? (
+	hdf? ( test? (
 		${TEST_DATA[@]/#/https://resources.unidata.ucar.edu/netcdf/sample_data/hdf4/}
-	)
+	) )
 "
 S="${WORKDIR}"/${PN}-c-${PV}
 
@@ -34,7 +34,7 @@ RESTRICT="!test? ( test )"
 # NOTE OPTION(ENABLE_HDF4 "Build netCDF-4 with HDF4 read capability(HDF4, HDF5 and Zlib required)." OFF)
 #
 # extra deps for hdf5 for https://github.com/Unidata/netcdf-c/issues/3198,
-# automagic in 4.9.3 :(
+# still automagic in 4.10.1 :(
 RDEPEND="
 	dev-libs/libxml2:=
 	dev-libs/libzip:=
@@ -47,10 +47,8 @@ RDEPEND="
 		sci-libs/hdf:=
 		sci-libs/hdf5:=
 	)
-	hdf5? (
-		sci-libs/hdf5:=[hl(+),mpi=,szip=,zlib]
-		virtual/szip:=
-	)
+	hdf5? ( sci-libs/hdf5:=[hl(+),mpi=,szip=,zlib] )
+	szip? ( virtual/szip:= )
 	zstd? ( app-arch/zstd:= )
 "
 
@@ -74,8 +72,6 @@ src_configure() {
 	use mpi && export CC=mpicc
 
 	local mycmakeargs=(
-		-DCMAKE_POLICY_DEFAULT_CMP0153="OLD" # exec_program
-
 		-DNETCDF_ENABLE_DAP_REMOTE_TESTS=OFF
 		#-DNETCDF_ENABLE_HDF4_FILE_TESTS=OFF
 		-DNETCDF_ENABLE_LIBXML2=ON
@@ -91,7 +87,7 @@ src_configure() {
 		-DNETCDF_ENABLE_DOXYGEN="$(usex doc)"
 		-DNETCDF_ENABLE_EXAMPLES="$(usex examples)"
 		-DNETCDF_ENABLE_HDF4="$(usex hdf)"
-		-DNETCDF_ENABLE_NETCDF_4="$(usex hdf5)"
+		-DNETCDF_ENABLE_HDF5="$(usex hdf5)"
 		-DNETCDF_ENABLE_TESTS="$(usex test)"
 
 		-DNETCDF_ENABLE_NCZARR="yes"
@@ -113,7 +109,10 @@ src_test() {
 	if [[ -f "${BUILD_DIR}/nc_test4/run_par_test.sh" ]]; then
 		sed -e 's/mpiexec/mpiexec --use-hwthread-cpus/g' -i "${BUILD_DIR}/nc_test4/run_par_test.sh" || die
 	fi
-	mv "${WORKDIR}"/*.hdf "${BUILD_DIR}/hdf4_test/" || die
+	# hdf4_test/ only exists with USE=hdf, see CMakeLists.txt:1530
+	if use hdf; then
+		mv "${WORKDIR}"/*.hdf "${BUILD_DIR}/hdf4_test/" || die
+	fi
 
 	cmake_src_test
 }
